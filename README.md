@@ -25,6 +25,6 @@
 
 ### mvc功能实现
 `DispatchServlet.doPost/doGet()` 来实现从客户端发起请求到页面渲染的工作，其工作流程图如下：
-![](mvc-workflow.png)
+![](https://github.com/fantj2016/easy-springmvc/blob/master/mvc-workflow.png)
 
 
