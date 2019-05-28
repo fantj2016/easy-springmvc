@@ -27,3 +27,6 @@ HELP.md
 
 ### VS Code ###
 .vscode/
+.mvn/
+mvnw.cmd
+src/main/java/com/fantj/mvc/test/
