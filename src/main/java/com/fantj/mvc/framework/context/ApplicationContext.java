@@ -5,6 +5,7 @@ import com.fantj.mvc.framework.annotation.Controller;
 import com.fantj.mvc.framework.annotation.Service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -30,12 +31,14 @@ public class ApplicationContext {
      * 传入一个配置文件路径，对IOC进行初始化
      */
     public ApplicationContext(String location) {
+        InputStream is = null;
         try {
             // 1. 载入配置文件
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream(location);
+//            InputStream is = this.getClass().getClassLoader().getResourceAsStream(location);
+            is = new FileInputStream("D:\\workspace\\easy-springmvc\\src\\main\\resources\\application.properties");
             config.load(is);
             // 2. 获取配置属性-- 扫描的包
-            String packageName = config.getProperty("package.scan");
+            String packageName = config.getProperty("packageScan");
             // 3. 注册
             doRegister(packageName);
             // 4. 初始化IOC
@@ -45,7 +48,7 @@ public class ApplicationContext {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        System.out.println("IOC 容器已经初始化");
     }
 
     private void populate() {
@@ -97,17 +100,15 @@ public class ApplicationContext {
                 }else if (clazz.isAnnotationPresent(Service.class)){
                     // service注解就有了 用户自定义名字的处理
                     Service service = clazz.getAnnotation(Service.class);
-                    if (service.value().equals("")){
+                    if (!service.value().equals("")){
                         // 如果用户未自定义名
-                        String id = firstCharToLower(clazz.getSimpleName());
-                        instanceMapping.put(id, clazz.newInstance());
-                    }else {
                         instanceMapping.put(service.value(), clazz.newInstance());
+                        continue;
                     }
                     // 再加载其接口类
                     Class<?>[] interfaces = clazz.getInterfaces();
                     for (Class<?> i: interfaces){
-                        instanceMapping.put(i.getName(), i.newInstance());
+                        instanceMapping.put(i.getName(), clazz.newInstance());
                     }
                 }else {
                     continue;
