@@ -12,6 +12,10 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.*;
 
+/**
+* 应用上下文 -- 提供bean注册、依赖注入、配置解析功能
+* @author JiaoFanTing
+**/
 public class ApplicationContext {
     /**
      * 存放示例对象的map
@@ -24,14 +28,15 @@ public class ApplicationContext {
     /**
      * 读取配置文件的properties
      */
-    Properties config = new Properties();
+    private Properties config = new Properties();
 
     /**
      * 构造方法：
      * 传入一个配置文件路径，对IOC进行初始化
+     * @author JiaoFanTing
      */
     public ApplicationContext(String location) {
-        InputStream is = null;
+        InputStream is;
         try {
             // 1. 载入配置文件
 //            InputStream is = this.getClass().getClassLoader().getResourceAsStream(location);
@@ -50,7 +55,10 @@ public class ApplicationContext {
         }
         System.out.println("IOC 容器已经初始化");
     }
-
+    /**
+    * 依赖注入
+    * @author JiaoFanTing
+    **/
     private void populate() {
         // 1. 判断IOC容器是否为空
         if (instanceMapping.isEmpty()){
@@ -83,6 +91,10 @@ public class ApplicationContext {
         }
     }
 
+    /**
+    * 创建bean
+    * @author JiaoFanTing
+    **/
     private void doCreateBean() {
         // 1. 检查是否有类信息注册缓存
         if (classCache == null) {
@@ -91,6 +103,7 @@ public class ApplicationContext {
         // 2. 遍历classCache 并创建实例 存放到 instanceMapping
         try {
             for (String className : classCache) {
+                // 反射加载类
                 Class<?> clazz = Class.forName(className);
                 // 加了需要加入IOC容器的注解，才进行初始化
                 if (clazz.isAnnotationPresent(Controller.class)){
@@ -110,8 +123,6 @@ public class ApplicationContext {
                     for (Class<?> i: interfaces){
                         instanceMapping.put(i.getName(), clazz.newInstance());
                     }
-                }else {
-                    continue;
                 }
             }
          }catch(ClassNotFoundException | IllegalAccessException | InstantiationException e){
@@ -122,15 +133,20 @@ public class ApplicationContext {
     private String firstCharToLower(String simpleName) {
         char[] chars = simpleName.toCharArray();
         chars[0] += 32;
-        return chars.toString();
+        return Arrays.toString(chars);
     }
 
+    /**
+    *  根据包名注册bean
+    * @author JiaoFanTing
+    * @param packageName 包名
+    **/
     private void doRegister(String packageName) {
         // 1. 根据包名获取到 资源路径， 以便递归加载类信息
         URL resource = this.getClass().getClassLoader().getResource("/" + packageName.replaceAll("\\.", "/"));
         // 2. 递归加载类信息
-        File files = new File(resource.getFile());
-        for (File file : files.listFiles()) {
+        File files = new File(Objects.requireNonNull(resource).getFile());
+        for (File file : Objects.requireNonNull(files.listFiles())) {
             // 判断是否是文件夹
             if (file.isDirectory()) {
                 // 如果是文件夹，递归调用

@@ -21,10 +21,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @Description:    java类作用描述
- * @Author:         Fant.J
- * @CreateDate:     2019/2/29 10:37
- */
+* 前置控制器 -- 拦截匹配的url
+* @author JiaoFanTing
+**/
 public class DispatcherServlet extends HttpServlet {
 
     private static final String LOCATION = "contextConfigLocation";
@@ -246,14 +245,14 @@ public class DispatcherServlet extends HttpServlet {
     private class HandlerAdapter {
         private Map<String, Integer> paramMappring;
 
-        public HandlerAdapter(Map<String, Integer> paramMappring) {
+        HandlerAdapter(Map<String, Integer> paramMappring) {
             this.paramMappring = paramMappring;
         }
 
         /**
          *
          */
-        public ModelAndView handle(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws InvocationTargetException, IllegalAccessException {
+        ModelAndView handle(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws InvocationTargetException, IllegalAccessException {
             // 拿到request请求中的参数列表
             Map<String, String[]> reqParam = req.getParameterMap();
             // 拿到我们adapter处理完后的参数列表
@@ -289,6 +288,7 @@ public class DispatcherServlet extends HttpServlet {
             }
             // 反射调用handler方法
             Object invoke = handler.method.invoke(handler.controller, paramValue);
+            // 如果该方法的返回参数是 ModelAndView 则进行类型转换并返回
             if (returnTypeIsModleAndView(handler)){
                 return (ModelAndView)invoke;
             }else {
